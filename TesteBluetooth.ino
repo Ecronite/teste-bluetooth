@@ -1,14 +1,20 @@
 #include <BLEDevice.h>
 #include <BLEScan.h>
-#include <LiquidCrystal.h>
-LiquidCrystal lcd(22,21,5,18,23,19);
+#include <Arduino.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27,16,2);
 BLEScan* pBLEScan;
 
 void setup() {
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  
   Serial.begin(115200);
   BLEDevice::init("ESP32");
   pBLEScan = BLEDevice::getScan();
-  lcd.begin(16,2);
+
 }
 
 void loop() {
@@ -25,7 +31,7 @@ void loop() {
       lcd.setCursor(1,0);
       lcd.print(device.getName().c_str());
     }
-+++++++++++++++++
+
     // Tenta obter informações adicionais
     if (device.haveServiceData()) {
       Serial.println("    Informações adicionais:");
@@ -35,6 +41,8 @@ void loop() {
     }
   }
   lcd.setCursor(1,1);
+  int dado = foundDevices.getCount(); // Seu dado do tipo int
+  Serial.write((uint8_t*)&dado, sizeof(dado));
   lcd.print(foundDevices.getCount());
   delay(2000);
 }
